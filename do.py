@@ -4,8 +4,8 @@ from aiogram.filters import CommandStart
 from aiogram.types import WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
 import asyncio
 
-API_TOKEN = 'SIZNING_BOT_TOKENINGIZ'
-WEB_APP_URL = 'https://sizning-saytingiz.uz' # Yuqoridagi HTML yuklangan manzil
+API_TOKEN = '8516821604:AAEW4IT9CXtB6R9hcoeRcnsJygCVzQ-IhOo' # Bot tokeningizni shu yerga qo'ying
+WEB_APP_URL = 'https://dostavka-dun.vercel.app/' # Yuqoridagi HTML yuklangan manzil
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
