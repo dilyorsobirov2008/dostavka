@@ -5,6 +5,8 @@ from aiogram.filters import CommandStart
 from aiogram.types import WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 from datetime import datetime
 import asyncio
+import os
+from aiohttp import web
 
 # Loglarni sozlash
 logging.basicConfig(level=logging.INFO)
@@ -12,13 +14,27 @@ logger = logging.getLogger(__name__)
 
 # Bot tokenini o'rnating
 API_TOKEN = '8516821604:AAEW4IT9CXtB6R9hcoeRcnsJygCVzQ-IhOo'
-WEB_APP_URL = 'https://dostavka-9pcr.vercel.app/index.html'  # Mini app URL
+WEB_APP_URL = 'https://dostavka-gamma.vercel.app/'  # Mini app URL
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
 # Buyurtmalarni saqlash uchun (database o'rniga)
 orders = {}
+
+# --- PORT UCHUN QISM ---
+async def handle(request):
+    return web.Response(text="Bot is running!")
+
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get('/', handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+# -----------------------
 
 @dp.message(CommandStart())
 async def start(message: types.Message):
@@ -297,7 +313,11 @@ async def echo_message(message: types.Message):
 async def main():
     """Botni ishga tushirish"""
     print("🤖 Bot ishga tushdi...")
-    await dp.start_polling(bot)
+    # Render uchun portni va botni parallel ishga tushiramiz
+    await asyncio.gather(
+        dp.start_polling(bot),
+        start_web_server()
+    )
 
 if __name__ == "__main__":
     try:
