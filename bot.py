@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Bot tokenini o'rnating
 API_TOKEN = '8516821604:AAEW4IT9CXtB6R9hcoeRcnsJygCVzQ-IhOo'
-WEB_APP_URL = 'https://dostavka-zxmb.vercel.app/'  # Mini app URL
+WEB_APP_URL = 'https://dostavka-9pcr.vercel.app/index.html'  # Mini app URL
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
