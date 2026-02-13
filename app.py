@@ -1,46 +1,38 @@
 #!/usr/bin/env python3
 """
-🛒 Supermarket Mini App - Complete Backend
-Features: Flask API, Telegram Bot, Order Management
+🛒 Supermarket Mini App - Backend (Threading Fixed)
 """
 
 import os
 import logging
-import json
 from datetime import datetime
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
-from telegram.ext import Application, CommandHandler, ContextTypes
-import threading
-import asyncio
 from dotenv import load_dotenv
+import random
+import string
 
-# Load environment variables
 load_dotenv()
 
-# ==================== LOGGING ====================
+# Logging
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# ==================== CONFIGURATION ====================
+# Configuration
 BOT_TOKEN = os.getenv('BOT_TOKEN', '8516821604:AAEW4IT9CXtB6R9hcoeRcnsJygCVzQ-IhOo')
-ADMIN_CHAT_ID = int(os.getenv('ADMIN_CHAT_ID', '7351189083'))
+ADMIN_CHAT_ID = os.getenv('ADMIN_CHAT_ID', '7351189083')
 BOT_USERNAME = os.getenv('BOT_USERNAME', 'tasamnodostavkabot')
 MINI_APP_URL = os.getenv('MINI_APP_URL', 'https://dostavka-intc.onrender.com')
 PORT = int(os.getenv('PORT', '8000'))
 
-# ==================== FLASK APP ====================
+# Flask App
 app = Flask(__name__)
 CORS(app)
 
-# Global bot application
-bot_app = None
-
-# ==================== PRODUCTS DATABASE ====================
+# Products Database
 PRODUCTS = {
     "mevalar": [
         {
@@ -136,7 +128,7 @@ PRODUCTS = {
     ]
 }
 
-# ==================== FLASK ROUTES ====================
+# ==================== ROUTES ====================
 
 @app.route('/')
 def home():
@@ -144,17 +136,12 @@ def home():
     return jsonify({
         'status': '✅ Bot ishlamoqda!',
         'service': 'Supermarket API v2.0',
-        'miniApp': MINI_APP_URL,
-        'endpoints': [
-            '/api/products',
-            '/api/orders',
-            '/health'
-        ]
+        'miniApp': MINI_APP_URL
     }), 200
 
 @app.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
+def health():
+    """Health check"""
     return jsonify({
         'status': 'OK',
         'timestamp': datetime.now().isoformat()
@@ -170,7 +157,7 @@ def get_products():
             'count': sum(len(items) for items in PRODUCTS.values())
         }), 200
     except Exception as e:
-        logger.error(f'Error fetching products: {str(e)}')
+        logger.error(f'Error: {str(e)}')
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/orders', methods=['POST'])
@@ -179,7 +166,7 @@ def create_order():
     try:
         data = request.get_json()
 
-        # Validate required fields
+        # Get fields
         user_name = data.get('userName', '').strip()
         phone = data.get('phone', '').strip()
         address = data.get('address', '').strip()
@@ -196,8 +183,6 @@ def create_order():
             }), 400
 
         # Generate order ID
-        import random
-        import string
         order_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=9))
 
         # Build items list
@@ -206,42 +191,37 @@ def create_order():
             for item in items
         ])
 
-        # Build admin message
+        # Build message
         admin_message = f"""
 <b>📦 YANGI BUYURTMA #{order_id}</b>
 
 <b>👤 Foydalanuvchi:</b> {user_name}
 <b>📱 Telefon:</b> <code>{phone}</code>
+<b>📍 Manzil:</b> <code>{address}</code>
 
-<b>📍 Dostavka manzili:</b>
-<code>{address}</code>
+{f'<b>📝 Izoh:</b> {notes}' if notes else ''}
 
-{f'<b>📝 Qo\'shimcha izoh:</b>{chr(10)}{notes}' if notes else ''}
-
-<b>📋 Buyurtma tafsilotlari:</b>
+<b>📋 Tafsilotlar:</b>
 {items_list}
 
-<b>💰 Oraliq narx:</b> <code>{total_price:,} so'm</code>
-<b>🚚 Dostavka:</b> <code>25,000 so'm</code>
-<b>💵 JAMI:</b> <code>{total_price + 25000:,} so'm</code>
-
-<b>⏰ Vaqti:</b> {datetime.fromisoformat(timestamp).strftime('%d.%m.%Y %H:%M:%S')}
+<b>💰 Narx:</b> {total_price:,} so'm
+<b>🚚 Dostavka:</b> 25,000 so'm
+<b>💵 JAMI:</b> {total_price + 25000:,} so'm
         """
 
-        logger.info(f'📦 New order created: #{order_id} by {user_name}')
+        logger.info(f'✅ Order #{order_id} created: {user_name}')
 
-        # Send notification to admin (async)
+        # Send admin notification
         try:
-            if bot_app:
-                asyncio.create_task(
-                    bot_app.bot.send_message(
-                        chat_id=ADMIN_CHAT_ID,
-                        text=admin_message,
-                        parse_mode='HTML'
-                    )
-                )
+            import requests
+            telegram_url = f'https://api.telegram.org/bot{BOT_TOKEN}/sendMessage'
+            requests.post(telegram_url, json={
+                'chat_id': ADMIN_CHAT_ID,
+                'text': admin_message,
+                'parse_mode': 'HTML'
+            }, timeout=10)
         except Exception as e:
-            logger.warning(f'⚠️ Could not send admin notification: {str(e)}')
+            logger.warning(f'Could not send notification: {str(e)}')
 
         return jsonify({
             'success': True,
@@ -251,143 +231,31 @@ def create_order():
         }), 200
 
     except Exception as e:
-        logger.error(f'❌ Order processing error: {str(e)}')
+        logger.error(f'Order error: {str(e)}')
         return jsonify({
             'success': False,
-            'error': f'Xato: {str(e)}'
+            'error': str(e)
         }), 500
-
-# ==================== TELEGRAM BOT HANDLERS ====================
-
-async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /start command"""
-    user = update.effective_user
-    logger.info(f'📱 New user: {user.first_name} (ID: {user.id})')
-
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton(
-            text='🛒 Supermarketchani ochish',
-            web_app=WebAppInfo(url=MINI_APP_URL)
-        )]
-    ])
-
-    message = f"""
-<b>🛒 Supermarket ilovasiga xush kelibsiz!</b>
-
-Salom, <b>{user.first_name}!</b> 👋
-
-<i>✨ Mahsulotlarni qidiring, savatchaga qo'shing va buyurtma bering!</i>
-
-<b>🎯 Xususiyatlar:</b>
-• 🏪 Keng mahsulot assortimenti
-• 🛒 Qulay savatcha tizimi
-• 📦 Tez dostavka (30-40 minut)
-• 💬 24/7 qo'llab-quvvatlash
-
-Ilovani boshlash uchun quyidagi tugmani bosing 👇
-    """
-
-    await update.message.reply_html(message, reply_markup=keyboard)
-
-async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /help command"""
-    help_text = """
-<b>📖 Qo'llanma:</b>
-
-<b>/start</b> - Ilovani boshlash
-<b>/help</b> - Yordam
-<b>/status</b> - Bot statusini ko'rish
-
-<b>📱 Ilovada qanday ishlash kerak:</b>
-1️⃣ Kategoriyalardan mahsulot tanlang
-2️⃣ "Savatchaga qo'shish" tugmasini bosing
-3️⃣ Savatcha bo'limida miqdorni o'zgartiring
-4️⃣ "Buyurtma berish" tugmasini bosing
-5️⃣ Shaklni to'ldiring va tasdiqlang
-6️⃣ Dostavkani kutib turing
-
-<b>❓ Savollar bo'lsa:</b>
-Admin: @tasannodostavka
-Email: info@supermarket.uz
-
-<i>Bot 24/7 ishlamoqda!</i>
-    """
-    await update.message.reply_html(help_text)
-
-async def status_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle /status command"""
-    status_text = f"""
-<b>🤖 Bot Status:</b>
-
-✅ <b>Bot:</b> Ishlamoqda
-✅ <b>API:</b> Aktiv
-✅ <b>Mini App:</b> {MINI_APP_URL}
-✅ <b>Database:</b> Bog'langan
-
-<b>📊 Statistika:</b>
-• Mahsulotlar: {sum(len(items) for items in PRODUCTS.values())} dona
-• Kategoriyalar: 4 ta
-• Dostavka vaqti: 30-40 minut
-• Eng yaxshi baholangan: 4.8/5 ⭐
-
-<i>Barcha tizimlar normal ishlamoqda!</i>
-    """
-    await update.message.reply_html(status_text)
-
-def run_bot():
-    """Run Telegram bot"""
-    global bot_app
-    
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    try:
-        # Initialize bot application
-        bot_app = Application.builder().token(BOT_TOKEN).build()
-
-        # Add handlers
-        bot_app.add_handler(CommandHandler('start', start_handler))
-        bot_app.add_handler(CommandHandler('help', help_handler))
-        bot_app.add_handler(CommandHandler('status', status_handler))
-
-        logger.info(f"""
-╔════════════════════════════════════════════════════╗
-║     🛒 SUPERMARKET BOT INITIALIZED SUCCESSFULLY   ║
-╠════════════════════════════════════════════════════╣
-║ 🤖 Bot Username: @{BOT_USERNAME}                    ║
-║ 📱 Mini App URL: {MINI_APP_URL[:40]}... ║
-║ 🔗 API Server: http://0.0.0.0:{PORT}               ║
-║ 📦 Products: {sum(len(items) for items in PRODUCTS.values())} dona                              ║
-║ 🌍 Environment: Production                        ║
-╚════════════════════════════════════════════════════╝
-        """)
-
-        # Run polling
-        loop.run_until_complete(bot_app.run_polling(allowed_updates=['message']))
-    except Exception as e:
-        logger.error(f'❌ Bot error: {str(e)}')
-    finally:
-        loop.close()
-
-def start_bot_thread():
-    """Start bot in separate thread"""
-    bot_thread = threading.Thread(target=run_bot, daemon=True)
-    bot_thread.start()
-    logger.info('🤖 Bot thread started')
 
 # ==================== MAIN ====================
 
 if __name__ == '__main__':
-    # Start bot in background
-    start_bot_thread()
+    logger.info(f"""
+╔════════════════════════════════════════════════════╗
+║     🛒 SUPERMARKET BOT - SIMPLE & STABLE          ║
+╠════════════════════════════════════════════════════╣
+║ 🤖 Bot: @{BOT_USERNAME}                            ║
+║ 📱 URL: {MINI_APP_URL[:40]}... ║
+║ 🔗 Port: {PORT}                                        ║
+║ 📦 Products: {sum(len(items) for items in PRODUCTS.values())} dona                              ║
+║ ✅ Status: Ready                                  ║
+╚════════════════════════════════════════════════════╝
+    """)
 
-    logger.info(f'🌐 Flask server starting on 0.0.0.0:{PORT}...')
-
-    # Run Flask app
+    # Run Flask
     app.run(
         host='0.0.0.0',
         port=PORT,
         debug=False,
-        threaded=True,
-        use_reloader=False
+        threaded=True
     )
