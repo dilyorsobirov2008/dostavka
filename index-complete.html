@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 Supermarket - Dostavka Tasanno</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">🛒 Supermarket</h1>
+                <p class="tagline">Tez dostavka, sifatli mahsulot</p>
+            </div>
+            <div class="header-right">
+                <div class="cart-summary">
+                    <div id="cartIcon" class="cart-icon" style="display: none;">
+                        <span class="cart-count" id="cartCount">0</span>
+                        <span class="cart-label">Savatcha</span>
+                    </div>
+                    <div class="price-display">
+                        <span class="price-label">Jami:</span>
+                        <span class="price-amount" id="totalPrice">0 so'm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <div class="container">
+        <div class="layout">
+            <!-- LEFT SECTION - PRODUCTS -->
+            <section class="products-section">
+                <!-- Category Filter -->
+                <div class="filter-area">
+                    <div class="category-filter">
+                        <h3>Kategoriyalar</h3>
+                        <div class="category-buttons" id="categoryList"></div>
+                    </div>
+                    
+                    <!-- Search Bar -->
+                    <div class="search-area">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            class="search-input" 
+                            placeholder="🔍 Mahsulotni qidirish..."
+                        >
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="products-container">
+                    <div class="products-grid" id="productsGrid"></div>
+                    <div class="loading-spinner" id="loadingSpinner" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Mahsulotlar yuklanmoqda...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT SECTION - CART SIDEBAR -->
+            <aside class="cart-section" id="cartSection" style="display: none;">
+                <div class="cart-container">
+                    <div class="cart-header">
+                        <h2>🛒 Savatcha</h2>
+                        <span class="cart-badge" id="cartItemCount">0</span>
+                    </div>
+
+                    <div class="cart-items-list" id="cartItems"></div>
+
+                    <div class="cart-divider"></div>
+
+                    <div class="cart-summary-section">
+                        <div class="summary-row">
+                            <span>Oraliq narx:</span>
+                            <span class="summary-value" id="subtotal">0 so'm</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Dostavka:</span>
+                            <span class="summary-value">25,000 so'm</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Jami:</span>
+                            <span class="summary-value" id="cartTotal">0 so'm</span>
+                        </div>
+                    </div>
+
+                    <button class="checkout-button" id="checkoutBtn">
+                        ✅ Buyurtma berish
+                        <span class="arrow">→</span>
+                    </button>
+
+                    <button class="clear-cart-btn" id="clearCartBtn" style="display: none;">
+                        🗑️ Savatcha tozalash
+                    </button>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- ==================== CHECKOUT MODAL ==================== -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h2>📦 Buyurtmani rasmiylashtirish</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Checkout Form -->
+                <form id="checkoutForm" class="checkout-form">
+                    <!-- Personal Info Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">👤 Shaxsiy ma'lumotlar</h3>
+                        <div class="form-group">
+                            <label for="userName">Ismingiz *</label>
+                            <input 
+                                type="text" 
+                                id="userName" 
+                                class="form-input" 
+                                placeholder="Ism va familiyangiz"
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Telefon raqami *</label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                class="form-input" 
+                                placeholder="+998 (90) 123-45-67"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Address Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">📍 Dostavka manzili</h3>
+                        <div class="form-group">
+                            <label for="address">To'liq manzil *</label>
+                            <textarea 
+                                id="address" 
+                                class="form-input form-textarea" 
+                                placeholder="Shahar, ko'cha, uy raqami, xonaning raqami"
+                                rows="3"
+                                required
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">📝 Qo'shimcha izoh</h3>
+                        <div class="form-group">
+                            <label for="notes">Izoh (ixtiyoriy)</label>
+                            <textarea 
+                                id="notes" 
+                                class="form-input form-textarea" 
+                                placeholder="Masalan: pintig'iga qo'ng'iroq qiling, eshik oldiga qo'ying"
+                                rows="2"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="order-summary">
+                        <h3 class="section-title">📦 Buyurtma tafsilotlari</h3>
+                        <div class="summary-list" id="orderSummary"></div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+                    <!-- Success Message -->
+                    <div id="successMessage" class="success-message" style="display: none;">
+                        <div class="success-content">
+                            <div class="success-icon">✅</div>
+                            <h3>Buyurtmangiz qabul qilindi!</h3>
+                            <p>Siz bilan tez orada bog'lanib, dostavka vaqtini keltiramiz.</p>
+                            <p class="thanks">Rahmat! 🙏</p>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-button" id="submitBtn">
+                        ✅ Buyurtmani tasdiqlash
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script src="app.js"></script>
+</body>
+</html>
