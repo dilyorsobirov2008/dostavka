@@ -75,15 +75,19 @@ async def test_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Test komandasi - bot ishlayotganini tekshirish"""
     try:
         user = update.effective_user
-        await update.message.reply_text(
+        username = user.username if user.username else "yo'q"
+        
+        message = (
             f"✅ Bot ishlayapti!\n\n"
             f"👤 Sizning ma'lumotlaringiz:\n"
             f"├ ID: {user.id}\n"
             f"├ Ism: {user.first_name}\n"
-            f"├ Username: @{user.username if user.username else 'yo\\'q'}\n"
+            f"├ Username: @{username}\n"
             f"└ Bot Version: 1.0\n\n"
             f"🌐 Web App URL: {WEB_APP_URL}"
         )
+        
+        await update.message.reply_text(message)
         logger.info(f"✅ Test komandasi: {user.first_name}")
         
     except Exception as e:
@@ -101,7 +105,7 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Xatolarni handle qilish"""
-    logger.error(f"❌ Update {update} xatolik keltirib chiqardi: {context.error}")
+    logger.error(f"❌ Update xatolik keltirib chiqardi: {context.error}")
     
     try:
         if update and update.effective_message:
