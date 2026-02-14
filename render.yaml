@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: supermarket-mini-app
+    runtime: python
+    pythonVersion: 3.11
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        scope: build
+      - key: TELEGRAM_CHAT_ID
+        scope: build
+      - key: FLASK_ENV
+        value: production
