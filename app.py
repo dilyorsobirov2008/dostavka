@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import os
 import requests
+import shutil  # Nusxa olish uchun qo'shimcha
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,144 +22,144 @@ ORDERS_FILE = 'orders.json'
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID')
 
-# Kuchaytirilgan tovarlar bo'limi
+# To'g'irlangan mahsulotlar bo'limi
 PRODUCTS = {
     "categories": [
-        "🍎 Meva", "🥗 Sabzavot", "💧 Ichimliklar", 
-        "🥛 Sut Mahsuloti", "🍞 Non", "🍰 Shirinlik",
-        "🥜 Asinolar", "🍦 Muzlavka", "🍖 Gosh Mahsuloti",
-        "🐟 Baliq", "🧂 Ziravorlar", "🍵 Choylar"
+        "🍎 Mevalar", "🥗 Sabzavotlar", "💧 Ichimliklar", 
+        "🥛 Sut mahsulotlari", "🍞 Non mahsulotlari", "🍰 Shirinliklar",
+        "🥜 Yong'oqlar", "🍦 Muzqaymoqlar", "🍖 Go'sht mahsulotlari",
+        "🐟 Baliqlar", "🧂 Ziravorlar", "🍵 Choylar"
     ],
     "products": [
-        # MEVA (12 ta)
-        {"id": 1, "name": "Olma (kg)", "category": "🍎 Meva", "price": 8000, "image": "https://images.unsplash.com/photo-1560806887-1295c1a9f632?w=300&h=300&fit=crop", "description": "Sho'rta, shirinli olma"},
-        {"id": 2, "name": "Banan (kg)", "category": "🍎 Meva", "price": 6000, "image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=300&h=300&fit=crop", "description": "Yangi, sariq banan"},
-        {"id": 3, "name": "Apelsin (kg)", "category": "🍎 Meva", "price": 9000, "image": "https://images.unsplash.com/photo-1611080626919-30979dba3c82?w=300&h=300&fit=crop", "description": "Sho'rta apelsin"},
-        {"id": 4, "name": "Qizil uzum (kg)", "category": "🍎 Meva", "price": 18000, "image": "https://images.unsplash.com/photo-1576684179506-ca7da12d8259?w=300&h=300&fit=crop", "description": "Sho't, shirinli uzum"},
-        {"id": 5, "name": "Limon (kg)", "category": "🍎 Meva", "price": 7000, "image": "https://images.unsplash.com/photo-1566201686209-51ce8a1e92dc?w=300&h=300&fit=crop", "description": "Sho'rta, tursh limon"},
-        {"id": 6, "name": "Ananas (dona)", "category": "🍎 Meva", "price": 12000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi ananas"},
-        {"id": 7, "name": "Qo'l o'rmonlari (kg)", "category": "🍎 Meva", "price": 25000, "image": "https://images.unsplash.com/photo-1585183732519-e21cc028cb29?w=300&h=300&fit=crop", "description": "Yangi qo'l o'rmonlari"},
-        {"id": 8, "name": "Shaftoli (kg)", "category": "🍎 Meva", "price": 11000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Sho'rta shaftoli"},
-        {"id": 9, "name": "Olxo'ri (kg)", "category": "🍎 Meva", "price": 14000, "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=300&fit=crop", "description": "Sho'rta olxo'ri"},
-        {"id": 10, "name": "Pomegranate (dona)", "category": "🍎 Meva", "price": 15000, "image": "https://images.unsplash.com/photo-1585183732519-e21cc028cb29?w=300&h=300&fit=crop", "description": "Yangi pomegranate"},
-        {"id": 11, "name": "Nok (kg)", "category": "🍎 Meva", "price": 10000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Sho'rta, shirinli nok"},
-        {"id": 12, "name": "Qora ko'k (kg)", "category": "🍎 Meva", "price": 22000, "image": "https://images.unsplash.com/photo-1585183732519-e21cc028cb29?w=300&h=300&fit=crop", "description": "Yangi qora ko'k"},
+        # MEVALAR
+        {"id": 1, "name": "Olma (kg)", "category": "🍎 Mevalar", "price": 8000, "image": "https://suret.pics/uploads/posts/2023-09/1695307331_1.jpg", "description": "Sershira va qarsildoq olma"},
+        {"id": 2, "name": "Banan (kg)", "category": "🍎 Mevalar", "price": 6000, "image": "https://cdn.uza.uz/2023/12/27/06/14/chabCEPpOd5GaPbqOWXE7Wez6X1E4dsR_front.jpg", "description": "Yangi keltirilgan banan"},
+        {"id": 3, "name": "Apelsin (kg)", "category": "🍎 Mevalar", "price": 9000, "image": "https://images.unsplash.com/photo-1611080626919-30979dba3c82?w=300&h=300&fit=crop", "description": "S vitamini bilan boy apelsin"},
+        {"id": 4, "name": "Qizil uzum (kg)", "category": "🍎 Mevalar", "price": 18000, "image": "https://images.unsplash.com/photo-1576684179506-ca7da12d8259?w=300&h=300&fit=crop", "description": "Shirin va sershira uzum"},
+        {"id": 5, "name": "Limon (kg)", "category": "🍎 Mevalar", "price": 7000, "image": "https://images.unsplash.com/photo-1566201686209-51ce8a1e92dc?w=300&h=300&fit=crop", "description": "Yangi uzilgan limon"},
+        {"id": 6, "name": "Ananas (dona)", "category": "🍎 Mevalar", "price": 12000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Ekzotik ananas"},
+        {"id": 7, "name": "Qulupnay (kg)", "category": "🍎 Mevalar", "price": 25000, "image": "https://images.unsplash.com/photo-1585183732519-e21cc028cb29?w=300&h=300&fit=crop", "description": "Yangi va shirin qulupnay"},
+        {"id": 8, "name": "Shaftoli (kg)", "category": "🍎 Mevalar", "price": 11000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Mayin shaftoli"},
+        {"id": 9, "name": "Olxo'ri (kg)", "category": "🍎 Mevalar", "price": 14000, "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=300&h=300&fit=crop", "description": "Sershira olxo'ri"},
+        {"id": 10, "name": "Anor (dona)", "category": "🍎 Mevalar", "price": 15000, "image": "https://images.unsplash.com/photo-1585183732519-e21cc028cb29?w=300&h=300&fit=crop", "description": "Qizil va shirin anor"},
+        {"id": 11, "name": "Nok (kg)", "category": "🍎 Mevalar", "price": 10000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yumshoq va shirin nok"},
+        {"id": 12, "name": "Chernika (kg)", "category": "🍎 Mevalar", "price": 22000, "image": "https://images.unsplash.com/photo-1585183732519-e21cc028cb29?w=300&h=300&fit=crop", "description": "Foydali chernika mevasi"},
 
-        # SABZAVOT (12 ta)
-        {"id": 13, "name": "Pomidor (kg)", "category": "🥗 Sabzavot", "price": 5000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi, qizil pomidor"},
-        {"id": 14, "name": "Salat (dona)", "category": "🥗 Sabzavot", "price": 3500, "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=300&fit=crop", "description": "Yangi, yashil salat"},
-        {"id": 15, "name": "Bodring (kg)", "category": "🥗 Sabzavot", "price": 3000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi bodring"},
-        {"id": 16, "name": "Sabzavot karvorti (dona)", "category": "🥗 Sabzavot", "price": 7000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi karvorti"},
-        {"id": 17, "name": "Soğan (kg)", "category": "🥗 Sabzavot", "price": 2500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Qizil soğan"},
-        {"id": 18, "name": "Sarmsaq (kg)", "category": "🥗 Sabzavot", "price": 8000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi sarmsaq"},
-        {"id": 19, "name": "Bibir (kg)", "category": "🥗 Sabzavot", "price": 4000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Qizil bibir"},
-        {"id": 20, "name": "Patates (kg)", "category": "🥗 Sabzavot", "price": 2000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi patates"},
-        {"id": 21, "name": "Kapusta (dona)", "category": "🥗 Sabzavot", "price": 3000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi kapusta"},
-        {"id": 22, "name": "Qizil lobiya (kg)", "category": "🥗 Sabzavot", "price": 9000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Quritilgan lobiya"},
-        {"id": 23, "name": "Piyoz (kg)", "category": "🥗 Sabzavot", "price": 3500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Sariq piyoz"},
-        {"id": 24, "name": "Buqun o't (to'ppi)", "category": "🥗 Sabzavot", "price": 1500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi buqun o't"},
+        # SABZAVOTLAR
+        {"id": 13, "name": "Pomidor (kg)", "category": "🥗 Sabzavotlar", "price": 5000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Qizil va pishgan pomidor"},
+        {"id": 14, "name": "Salat bargi (dona)", "category": "🥗 Sabzavotlar", "price": 3500, "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&h=300&fit=crop", "description": "Yangi va barra salat bargi"},
+        {"id": 15, "name": "Bodring (kg)", "category": "🥗 Sabzavotlar", "price": 3000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Karsildoq bodring"},
+        {"id": 16, "name": "Baqlajon (kg)", "category": "🥗 Sabzavotlar", "price": 7000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi baqlajonlar"},
+        {"id": 17, "name": "Qizil piyoz (kg)", "category": "🥗 Sabzavotlar", "price": 2500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Salatlar uchun qizil piyoz"},
+        {"id": 18, "name": "Sarimsoqpiyoz (kg)", "category": "🥗 Sabzavotlar", "price": 8000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "O'tkir ta'mli sarimsoqpiyoz"},
+        {"id": 19, "name": "Bolgar qalampiri (kg)", "category": "🥗 Sabzavotlar", "price": 4000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Shirin bolgar qalampiri"},
+        {"id": 20, "name": "Kartoshka (kg)", "category": "🥗 Sabzavotlar", "price": 2000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Sifatli kartoshka"},
+        {"id": 21, "name": "Karam (dona)", "category": "🥗 Sabzavotlar", "price": 3000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Oq karam"},
+        {"id": 22, "name": "Qizil lobiya (kg)", "category": "🥗 Sabzavotlar", "price": 9000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Saralangan qizil lobiya"},
+        {"id": 23, "name": "Piyoz (kg)", "category": "🥗 Sabzavotlar", "price": 3500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Sariq piyoz"},
+        {"id": 24, "name": "Ko'katlar (bog')", "category": "🥗 Sabzavotlar", "price": 1500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi uzilgan ko'katlar"},
 
-        # ICHIMLIKLAR (10 ta)
-        {"id": 25, "name": "Toza suv 1.5L", "category": "💧 Ichimliklar", "price": 2500, "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop", "description": "Toza, shirin suv"},
-        {"id": 26, "name": "Sprite 0.5L", "category": "💧 Ichimliklar", "price": 3500, "image": "https://images.unsplash.com/photo-1554866585-e1dd5a36d1ef?w=300&h=300&fit=crop", "description": "Sprite ichimlik"},
-        {"id": 27, "name": "Cola 0.5L", "category": "💧 Ichimliklar", "price": 3500, "image": "https://images.unsplash.com/photo-1554789867-42ec9804ff21?w=300&h=300&fit=crop", "description": "Cola ichimlik"},
-        {"id": 28, "name": "Apelsin shira 1L", "category": "💧 Ichimliklar", "price": 4500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Natural shira"},
-        {"id": 29, "name": "Alma shira 1L", "category": "💧 Ichimliklar", "price": 4000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Natural alma shira"},
-        {"id": 30, "name": "Qora choy 100g", "category": "💧 Ichimliklar", "price": 8000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi choy"},
-        {"id": 31, "name": "Yashil choy 100g", "category": "💧 Ichimliklar", "price": 12000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi yashil choy"},
-        {"id": 32, "name": "Qahva 500g", "category": "💧 Ichimliklar", "price": 25000, "image": "https://images.unsplash.com/photo-1559056099-641a0ac8b3f7?w=300&h=300&fit=crop", "description": "Yangi qahva"},
-        {"id": 33, "name": "Kakao 200g", "category": "💧 Ichimliklar", "price": 15000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi kakao"},
-        {"id": 34, "name": "Kompot 1L", "category": "💧 Ichimliklar", "price": 5500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi kompot"},
+        # ICHIMLIKLAR
+        {"id": 25, "name": "Gazsiz suv 1.5L", "category": "💧 Ichimliklar", "price": 2500, "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop", "description": "Toza ichimlik suvi"},
+        {"id": 26, "name": "Sprite 0.5L", "category": "💧 Ichimliklar", "price": 3500, "image": "https://images.unsplash.com/photo-1554866585-e1dd5a36d1ef?w=300&h=300&fit=crop", "description": "Limonli gazlangan ichimlik"},
+        {"id": 27, "name": "Coca-Cola 0.5L", "category": "💧 Ichimliklar", "price": 3500, "image": "https://images.unsplash.com/photo-1554789867-42ec9804ff21?w=300&h=300&fit=crop", "description": "Klassik gazlangan ichimlik"},
+        {"id": 28, "name": "Pepsi 1L", "category": "💧 Ichimliklar", "price": 4500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Gazlangan ichimlik"},
+        {"id": 29, "name": "Olma sharbati 1L", "category": "💧 Ichimliklar", "price": 4000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Tabiiy olma sharbati"},
+        {"id": 30, "name": "Qora choy 100g", "category": "💧 Ichimliklar", "price": 8000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Sifatli qora choy"},
+        {"id": 31, "name": "Yashil choy 100g", "category": "💧 Ichimliklar", "price": 12000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Saralangan yashil choy"},
+        {"id": 32, "name": "Qahva 500g", "category": "💧 Ichimliklar", "price": 25000, "image": "https://images.unsplash.com/photo-1559056099-641a0ac8b3f7?w=300&h=300&fit=crop", "description": "Tabiiy maydalangan qahva"},
+        {"id": 33, "name": "Kakao 200g", "category": "💧 Ichimliklar", "price": 15000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Mazali kakao kukuni"},
+        {"id": 34, "name": "Kompot 1L", "category": "💧 Ichimliklar", "price": 5500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Uy sharoitida tayyorlangan kompot"},
 
-        # SUT MAHSULOTI (10 ta)
-        {"id": 35, "name": "Sut 1L", "category": "🥛 Sut Mahsuloti", "price": 9000, "image": "https://images.unsplash.com/photo-1550592154-17ccbf17eaf3?w=300&h=300&fit=crop", "description": "Yangi, sof sut"},
-        {"id": 36, "name": "Yoqurt 500ml", "category": "🥛 Sut Mahsuloti", "price": 6000, "image": "https://images.unsplash.com/photo-1488477181946-6428a0291840?w=300&h=300&fit=crop", "description": "Yangi yoqurt"},
-        {"id": 37, "name": "Tvorog 500g", "category": "🥛 Sut Mahsuloti", "price": 14000, "image": "https://images.unsplash.com/photo-1589985643862-3c1a6218e2d6?w=300&h=300&fit=crop", "description": "Yangi tvorog"},
-        {"id": 38, "name": "Pishloq 500g", "category": "🥛 Sut Mahsuloti", "price": 22000, "image": "https://images.unsplash.com/photo-1589985643862-3c1a6218e2d6?w=300&h=300&fit=crop", "description": "Yangi pishloq"},
-        {"id": 39, "name": "Qaymoq 250ml", "category": "🥛 Sut Mahsuloti", "price": 8000, "image": "https://images.unsplash.com/photo-1550592154-17ccbf17eaf3?w=300&h=300&fit=crop", "description": "Yangi qaymoq"},
-        {"id": 40, "name": "Smetana 200g", "category": "🥛 Sut Mahsuloti", "price": 7500, "image": "https://images.unsplash.com/photo-1550592154-17ccbf17eaf3?w=300&h=300&fit=crop", "description": "Yangi smetana"},
-        {"id": 41, "name": "Qutab (kg)", "category": "🥛 Sut Mahsuloti", "price": 16000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi qutab"},
-        {"id": 42, "name": "Mozzarella 250g", "category": "🥛 Sut Mahsuloti", "price": 18000, "image": "https://images.unsplash.com/photo-1589985643862-3c1a6218e2d6?w=300&h=300&fit=crop", "description": "Yangi mozzarella"},
-        {"id": 43, "name": "Ayran 500ml", "category": "🥛 Sut Mahsuloti", "price": 5000, "image": "https://images.unsplash.com/photo-1550592154-17ccbf17eaf3?w=300&h=300&fit=crop", "description": "Yangi ayran"},
-        {"id": 44, "name": "Katyk 500ml", "category": "🥛 Sut Mahsuloti", "price": 6500, "image": "https://images.unsplash.com/photo-1488477181946-6428a0291840?w=300&h=300&fit=crop", "description": "Yangi katyk"},
+        # SUT MAHSULOTLARI
+        {"id": 35, "name": "Sut 1L", "category": "🥛 Sut mahsulotlari", "price": 9000, "image": "https://images.unsplash.com/photo-1550592154-17ccbf17eaf3?w=300&h=300&fit=crop", "description": "Yangi va toza sut"},
+        {"id": 36, "name": "Yogurt 500ml", "category": "🥛 Sut mahsulotlari", "price": 6000, "image": "https://images.unsplash.com/photo-1488477181946-6428a0291840?w=300&h=300&fit=crop", "description": "Mevali yogurt"},
+        {"id": 37, "name": "Tvorog 500g", "category": "🥛 Sut mahsulotlari", "price": 14000, "image": "https://images.unsplash.com/photo-1589985643862-3c1a6218e2d6?w=300&h=300&fit=crop", "description": "Yumshoq tvorog"},
+        {"id": 38, "name": "Pishloq 500g", "category": "🥛 Sut mahsulotlari", "price": 22000, "image": "https://images.unsplash.com/photo-1589985643862-3c1a6218e2d6?w=300&h=300&fit=crop", "description": "Golland pishlog'i"},
+        {"id": 39, "name": "Qaymoq 250ml", "category": "🥛 Sut mahsulotlari", "price": 8000, "image": "https://images.unsplash.com/photo-1550592154-17ccbf17eaf3?w=300&h=300&fit=crop", "description": "Yog'li qaymoq"},
+        {"id": 40, "name": "Smetana 200g", "category": "🥛 Sut mahsulotlari", "price": 7500, "image": "https://images.unsplash.com/photo-1550592154-17ccbf17eaf3?w=300&h=300&fit=crop", "description": "Yangi smetana"},
+        {"id": 41, "name": "Qurt (kg)", "category": "🥛 Sut mahsulotlari", "price": 16000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Sho'r qurt"},
+        {"id": 42, "name": "Mozzarella 250g", "category": "🥛 Sut mahsulotlari", "price": 18000, "image": "https://images.unsplash.com/photo-1589985643862-3c1a6218e2d6?w=300&h=300&fit=crop", "description": "Pitsa uchun mozzarella"},
+        {"id": 43, "name": "Ayron 500ml", "category": "🥛 Sut mahsulotlari", "price": 5000, "image": "https://images.unsplash.com/photo-1550592154-17ccbf17eaf3?w=300&h=300&fit=crop", "description": "Chanqoqbosti ayron"},
+        {"id": 44, "name": "Qatiq 500ml", "category": "🥛 Sut mahsulotlari", "price": 6500, "image": "https://images.unsplash.com/photo-1488477181946-6428a0291840?w=300&h=300&fit=crop", "description": "Xonadon qatig'i"},
 
-        # NON (8 ta)
-        {"id": 45, "name": "Oq non (kg)", "category": "🍞 Non", "price": 4000, "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop", "description": "Yangi oq non"},
-        {"id": 46, "name": "Qora non (kg)", "category": "🍞 Non", "price": 5000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi qora non"},
-        {"id": 47, "name": "Lavash", "category": "🍞 Non", "price": 3000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi lavash"},
-        {"id": 48, "name": "Somsa (6 dona)", "category": "🍞 Non", "price": 12000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi somsa"},
-        {"id": 49, "name": "Puri (kg)", "category": "🍞 Non", "price": 6000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi puri"},
-        {"id": 50, "name": "Tandoor non", "category": "🍞 Non", "price": 3500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi tandoor non"},
-        {"id": 51, "name": "Boqal (dona)", "category": "🍞 Non", "price": 2500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi boqal"},
-        {"id": 52, "name": "Turshi non (dona)", "category": "🍞 Non", "price": 3000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi turshi non"},
+        # NON MAHSULOTLARI
+        {"id": 45, "name": "Oq non (buxanka)", "category": "🍞 Non mahsulotlari", "price": 4000, "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&fit=crop", "description": "Issiq oq non"},
+        {"id": 46, "name": "Qora non (kg)", "category": "🍞 Non mahsulotlari", "price": 5000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Parhezbop qora non"},
+        {"id": 47, "name": "Lavash xamiri", "category": "🍞 Non mahsulotlari", "price": 3000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yupqa lavash xamiri"},
+        {"id": 48, "name": "Somsa xamiri (6 dona)", "category": "🍞 Non mahsulotlari", "price": 12000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Tayyor qatlama xamir"},
+        {"id": 49, "name": "Patir non", "category": "🍞 Non mahsulotlari", "price": 6000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yog'li patir non"},
+        {"id": 50, "name": "Tandir non", "category": "🍞 Non mahsulotlari", "price": 3500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Issiq tandir non"},
+        {"id": 51, "name": "Bulochka (dona)", "category": "🍞 Non mahsulotlari", "price": 2500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Shirin bulochka"},
+        {"id": 52, "name": "Parhez non (dona)", "category": "🍞 Non mahsulotlari", "price": 3000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Suli noni"},
 
-        # SHIRINLIK (10 ta)
-        {"id": 53, "name": "Shokolad 100g", "category": "🍰 Shirinlik", "price": 8000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Qorali shokolad"},
-        {"id": 54, "name": "Keks (6 dona)", "category": "🍰 Shirinlik", "price": 6000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Yangi keks"},
-        {"id": 55, "name": "Tort (kg)", "category": "🍰 Shirinlik", "price": 35000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Yangi tort"},
-        {"id": 56, "name": "Cookies 200g", "category": "🍰 Shirinlik", "price": 5000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Yangi cookies"},
-        {"id": 57, "name": "Pirozhki (6 dona)", "category": "🍰 Shirinlik", "price": 8000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Yangi pirozhki"},
-        {"id": 58, "name": "Halva 300g", "category": "🍰 Shirinlik", "price": 9000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi halva"},
-        {"id": 59, "name": "Marmelad 200g", "category": "🍰 Shirinlik", "price": 4500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi marmelad"},
-        {"id": 60, "name": "Caramel 100g", "category": "🍰 Shirinlik", "price": 3500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi caramel"},
-        {"id": 61, "name": "Pastilas 150g", "category": "🍰 Shirinlik", "price": 4000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi pastilas"},
-        {"id": 62, "name": "Chay qo'l 100g", "category": "🍰 Shirinlik", "price": 5500, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Yangi chay qo'li"},
+        # SHIRINLIKLAR
+        {"id": 53, "name": "Shokolad 100g", "category": "🍰 Shirinliklar", "price": 8000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Sutli shokolad"},
+        {"id": 54, "name": "Keks (6 dona)", "category": "🍰 Shirinliklar", "price": 6000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Mayizli kekslar"},
+        {"id": 55, "name": "Tort (kg)", "category": "🍰 Shirinliklar", "price": 35000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Bayramona shokoladli tort"},
+        {"id": 56, "name": "Pechenye 200g", "category": "🍰 Shirinliklar", "price": 5000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Qarsildoq pechenyelar"},
+        {"id": 57, "name": "Pirojniy (6 dona)", "category": "🍰 Shirinliklar", "price": 8000, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Mevali pirojniylar"},
+        {"id": 58, "name": "Halvo 300g", "category": "🍰 Shirinliklar", "price": 9000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Kunjutli halvo"},
+        {"id": 59, "name": "Marmelad 200g", "category": "🍰 Shirinliklar", "price": 4500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Turli rangli marmeladlar"},
+        {"id": 60, "name": "Karamel 100g", "category": "🍰 Shirinliklar", "price": 3500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Shirin karamellar"},
+        {"id": 61, "name": "Pastila 150g", "category": "🍰 Shirinliklar", "price": 4000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Olma pastilasi"},
+        {"id": 62, "name": "Chak-chak 100g", "category": "🍰 Shirinliklar", "price": 5500, "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=300&fit=crop", "description": "Asalli chak-chak"},
 
-        # ASINOLAR (8 ta)
-        {"id": 63, "name": "Badаm (kg)", "category": "🥜 Asinolar", "price": 45000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Yangi badam"},
-        {"id": 64, "name": "Yoqoli (kg)", "category": "🥜 Asinolar", "price": 22000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Yangi yoqoli"},
-        {"id": 65, "name": "Fistiq (kg)", "category": "🥜 Asinolar", "price": 35000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Yangi fistiq"},
-        {"id": 66, "name": "Semiz (kg)", "category": "🥜 Asinolar", "price": 28000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Yangi semiz"},
-        {"id": 67, "name": "Valnuts (kg)", "category": "🥜 Asinolar", "price": 40000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Yangi valnuts"},
-        {"id": 68, "name": "Uruk (kg)", "category": "🥜 Asinolar", "price": 18000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi uruk"},
-        {"id": 69, "name": "Sunflower seeds (kg)", "category": "🥜 Asinolar", "price": 12000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Yangi seeds"},
-        {"id": 70, "name": "Pumpkin seeds (kg)", "category": "🥜 Asinolar", "price": 20000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Yangi pumpkin seeds"},
+        # YONG'OQLAR
+        {"id": 63, "name": "Bodom (kg)", "category": "🥜 Yong'oqlar", "price": 45000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Pishgan shirin bodom"},
+        {"id": 64, "name": "Yeryong'oq (kg)", "category": "🥜 Yong'oqlar", "price": 22000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Tozalangan yeryong'oq"},
+        {"id": 65, "name": "Pista (kg)", "category": "🥜 Yong'oqlar", "price": 35000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Eron pistasi"},
+        {"id": 66, "name": "Keshyu (kg)", "category": "🥜 Yong'oqlar", "price": 28000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Tuzlangan keshyu"},
+        {"id": 67, "name": "Yong'oq (kg)", "category": "🥜 Yong'oqlar", "price": 40000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Tozalangan yong'oq mag'zi"},
+        {"id": 68, "name": "Turshak (kg)", "category": "🥜 Yong'oqlar", "price": 18000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Quritilgan o'rik (turshak)"},
+        {"id": 69, "name": "Pista (kg)", "category": "🥜 Yong'oqlar", "price": 12000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Kungaboqar pistasi"},
+        {"id": 70, "name": "Qovoq urug'i (kg)", "category": "🥜 Yong'oqlar", "price": 20000, "image": "https://images.unsplash.com/photo-1585706781021-99000a51b93c?w=300&h=300&fit=crop", "description": "Tozalangan qovoq urug'i"},
 
-        # MUZLAVKA (6 ta)
-        {"id": 71, "name": "Qaymoq muzlavka", "category": "🍦 Muzlavka", "price": 8000, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Yangi qaymoq muzlavka"},
-        {"id": 72, "name": "Chocolate muzlavka", "category": "🍦 Muzlavka", "price": 8500, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Yangi chocolate muzlavka"},
-        {"id": 73, "name": "Qovun muzlavka", "category": "🍦 Muzlavka", "price": 7500, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Yangi qovun muzlavka"},
-        {"id": 74, "name": "Olma muzlavka", "category": "🍦 Muzlavka", "price": 7000, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Yangi olma muzlavka"},
-        {"id": 75, "name": "Nol qalora (diet)", "category": "🍦 Muzlavka", "price": 6500, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Diet muzlavka"},
-        {"id": 76, "name": "Dondurma", "category": "🍦 Muzlavka", "price": 5000, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Yangi dondurma"},
+        # MUZQAYMOQLAR
+        {"id": 71, "name": "Qaymoqli muzqaymoq", "category": "🍦 Muzqaymoqlar", "price": 8000, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Klassik qaymoqli muzqaymoq"},
+        {"id": 72, "name": "Shokoladli muzqaymoq", "category": "🍦 Muzqaymoqlar", "price": 8500, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Shokoladli va muzli"},
+        {"id": 73, "name": "Qovunli muzqaymoq", "category": "🍦 Muzqaymoqlar", "price": 7500, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Xushbo'y qovunli"},
+        {"id": 74, "name": "Olmal muzqaymoq", "category": "🍦 Muzqaymoqlar", "price": 7000, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Muzlatilgan olma sharbati"},
+        {"id": 75, "name": "Dietik muzqaymoq", "category": "🍦 Muzqaymoqlar", "price": 6500, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Shakarsiz muzqaymoq"},
+        {"id": 76, "name": "Dondurma", "category": "🍦 Muzqaymoqlar", "price": 5000, "image": "https://images.unsplash.com/photo-1563805042-7684c019e157?w=300&h=300&fit=crop", "description": "Turkcha dondurma"},
 
-        # GOSH MAHSULOTI (8 ta)
-        {"id": 77, "name": "Tovuq ko'ksa (kg)", "category": "🍖 Gosh Mahsuloti", "price": 28000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi tovuq ko'ksa"},
-        {"id": 78, "name": "Tovuq (kg)", "category": "🍖 Gosh Mahsuloti", "price": 32000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi tovuq"},
-        {"id": 79, "name": "Goʻsht (kg)", "category": "🍖 Gosh Mahsuloti", "price": 45000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi qo'y go'shti"},
-        {"id": 80, "name": "Kolbasa (kg)", "category": "🍖 Gosh Mahsuloti", "price": 35000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi kolbasa"},
-        {"id": 81, "name": "Sosiskа (kg)", "category": "🍖 Gosh Mahsuloti", "price": 28000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi sosiska"},
-        {"id": 82, "name": "Jambo (kg)", "category": "🍖 Gosh Mahsuloti", "price": 32000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi jambo"},
-        {"id": 83, "name": "Baqalava go'shti (kg)", "category": "🍖 Gosh Mahsuloti", "price": 38000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi baqalava"},
-        {"id": 84, "name": "Qavatdan (kg)", "category": "🍖 Gosh Mahsuloti", "price": 55000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi qavatdan"},
+        # GO'SHT MAHSULOTLARI
+        {"id": 77, "name": "Tovuq lahm (kg)", "category": "🍖 Go'sht mahsulotlari", "price": 28000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi tovuq lahmi"},
+        {"id": 78, "name": "Tovuq (kg)", "category": "🍖 Go'sht mahsulotlari", "price": 32000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Butun tovuq"},
+        {"id": 79, "name": "Qo'y go'shti (kg)", "category": "🍖 Go'sht mahsulotlari", "price": 45000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yangi qo'y go'shti"},
+        {"id": 80, "name": "Kolbasa (kg)", "category": "🍖 Go'sht mahsulotlari", "price": 35000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Halol kolbasa mahsuloti"},
+        {"id": 81, "name": "Sosiska (kg)", "category": "🍖 Go'sht mahsulotlari", "price": 28000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Sifatli sosiskalar"},
+        {"id": 82, "name": "Dudlangan go'sht (kg)", "category": "🍖 Go'sht mahsulotlari", "price": 32000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Dudlangan mol go'shti"},
+        {"id": 83, "name": "Mol go'shti (kg)", "category": "🍖 Go'sht mahsulotlari", "price": 38000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Yumshoq mol go'shti"},
+        {"id": 84, "name": "Qiyma (kg)", "category": "🍖 Go'sht mahsulotlari", "price": 55000, "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&h=300&fit=crop", "description": "Uy qiymasi"},
 
-        # BALIQ (6 ta)
-        {"id": 85, "name": "Shom baliq (kg)", "category": "🐟 Baliq", "price": 42000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi shom baliq"},
-        {"id": 86, "name": "Losos (kg)", "category": "🐟 Baliq", "price": 65000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi losos"},
-        {"id": 87, "name": "Karp (kg)", "category": "🐟 Baliq", "price": 38000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi karp"},
-        {"id": 88, "name": "Sudak (kg)", "category": "🐟 Baliq", "price": 48000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi sudak"},
-        {"id": 89, "name": "Calamari (kg)", "category": "🐟 Baliq", "price": 55000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi calamari"},
-        {"id": 90, "name": "Krevetka (kg)", "category": "🐟 Baliq", "price": 72000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi krevetka"},
+        # BALIQLAR
+        {"id": 85, "name": "Sazan baliq (kg)", "category": "🐟 Baliqlar", "price": 42000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi tutilgan sazan"},
+        {"id": 86, "name": "Losos (kg)", "category": "🐟 Baliqlar", "price": 65000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Sifatli losos balig'i"},
+        {"id": 87, "name": "Karp (kg)", "category": "🐟 Baliqlar", "price": 38000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Tirik karp balig'i"},
+        {"id": 88, "name": "Sudak (kg)", "category": "🐟 Baliqlar", "price": 48000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Saralangan sudak balig'i"},
+        {"id": 89, "name": "Kalmar (kg)", "category": "🐟 Baliqlar", "price": 55000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi muzlatilgan kalmar"},
+        {"id": 90, "name": "Krevetka (kg)", "category": "🐟 Baliqlar", "price": 72000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yirik krevetkalar"},
 
-        # ZIRAVORLAR (8 ta)
-        {"id": 91, "name": "Tuz (kg)", "category": "🧂 Ziravorlar", "price": 2000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Toza tuz"},
-        {"id": 92, "name": "Qora murch (100g)", "category": "🧂 Ziravorlar", "price": 5000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi qora murch"},
-        {"id": 93, "name": "Red murch (100g)", "category": "🧂 Ziravorlar", "price": 3500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi red murch"},
-        {"id": 94, "name": "Barchka (100g)", "category": "🧂 Ziravorlar", "price": 6000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi barchka"},
-        {"id": 95, "name": "Gil (100g)", "category": "🧂 Ziravorlar", "price": 4000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi gil"},
-        {"id": 96, "name": "Koriandor (100g)", "category": "🧂 Ziravorlar", "price": 4500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi koriandor"},
-        {"id": 97, "name": "Sarmasak qo'l (100g)", "category": "🧂 Ziravorlar", "price": 5500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi sarmasak qo'li"},
-        {"id": 98, "name": "Kumush (100g)", "category": "🧂 Ziravorlar", "price": 7000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yangi kumush"},
+        # ZIRAVORLAR
+        {"id": 91, "name": "Osh tuzi (kg)", "category": "🧂 Ziravorlar", "price": 2000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Yodlangan osh tuzi"},
+        {"id": 92, "name": "Qora murch (100g)", "category": "🧂 Ziravorlar", "price": 5000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Maydalangan qora murch"},
+        {"id": 93, "name": "Qizil murch (100g)", "category": "🧂 Ziravorlar", "price": 3500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Achchiq qizil murch"},
+        {"id": 94, "name": "Zira (100g)", "category": "🧂 Ziravorlar", "price": 6000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Xushbo'y zira"},
+        {"id": 95, "name": "Kashnich urug'i (100g)", "category": "🧂 Ziravorlar", "price": 4000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Maydalangan kashnich"},
+        {"id": 96, "name": "Zarchava (100g)", "category": "🧂 Ziravorlar", "price": 4500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Tabiiy zarchava"},
+        {"id": 97, "name": "Sarimsoq kukuni (100g)", "category": "🧂 Ziravorlar", "price": 5500, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Quritilgan sarimsoq"},
+        {"id": 98, "name": "Murch donachalari (100g)", "category": "🧂 Ziravorlar", "price": 7000, "image": "https://images.unsplash.com/photo-1599599810694-b5ac4dd33120?w=300&h=300&fit=crop", "description": "Butun murch donalari"},
 
-        # CHOYLAR (8 ta)
-        {"id": 99, "name": "Qora choy (100g)", "category": "🍵 Choylar", "price": 8000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi qora choy"},
-        {"id": 100, "name": "Yashil choy (100g)", "category": "🍵 Choylar", "price": 12000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi yashil choy"},
-        {"id": 101, "name": "Oolong choy (100g)", "category": "🍵 Choylar", "price": 15000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi oolong choy"},
-        {"id": 102, "name": "Menta choy (50g)", "category": "🍵 Choylar", "price": 6000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi menta choy"},
-        {"id": 103, "name": "Rose choy (50g)", "category": "🍵 Choylar", "price": 8000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi rose choy"},
-        {"id": 104, "name": "Ginger choy (100g)", "category": "🍵 Choylar", "price": 10000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi ginger choy"},
-        {"id": 105, "name": "Chamomile (50g)", "category": "🍵 Choylar", "price": 7000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi chamomile"},
-        {"id": 106, "name": "Hibiscus (100g)", "category": "🍵 Choylar", "price": 9000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Yangi hibiscus"}
+        # CHOYLAR
+        {"id": 99, "name": "Qora choy (100g)", "category": "🍵 Choylar", "price": 8000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Hindiston qora choyi"},
+        {"id": 100, "name": "Yashil choy (100g)", "category": "🍵 Choylar", "price": 12000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Xitoy yashil choyi"},
+        {"id": 101, "name": "Oolong choyi (100g)", "category": "🍵 Choylar", "price": 15000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Sifatli oolong choyi"},
+        {"id": 102, "name": "Yalpizli choy (50g)", "category": "🍵 Choylar", "price": 6000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Tinchlantiruvchi yalpizli choy"},
+        {"id": 103, "name": "Namatak choyi (50g)", "category": "🍵 Choylar", "price": 8000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Vitaminli namatak"},
+        {"id": 104, "name": "Zanjabil choyi (100g)", "category": "🍵 Choylar", "price": 10000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Isituvchi zanjabil choyi"},
+        {"id": 105, "name": "Moychechak choyi (50g)", "category": "🍵 Choylar", "price": 7000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Tabiiy moychechak choyi"},
+        {"id": 106, "name": "Karkade choyi (100g)", "category": "🍵 Choylar", "price": 9000, "image": "https://images.unsplash.com/photo-1597318345206-61f3ee1edbf2?w=300&h=300&fit=crop", "description": "Qizil karkade choyi"}
     ]
 }
 
@@ -169,6 +170,11 @@ def load_orders():
     return []
 
 def save_orders(orders):
+    # Qo'shimcha: Har safar saqlashdan oldin zaxira nusxa yaratish
+    if os.path.exists(ORDERS_FILE):
+        if not os.path.exists('backups'): os.makedirs('backups')
+        shutil.copy(ORDERS_FILE, f'backups/orders_backup_{datetime.now().strftime("%Y%m%d")}.json')
+        
     with open(ORDERS_FILE, 'w', encoding='utf-8') as f:
         json.dump(orders, f, ensure_ascii=False, indent=2)
 
@@ -212,6 +218,33 @@ def send_to_telegram(order_id, user_name, phone, location, items, total, user_id
         print(f"Telegram xato: {e}")
         return False
 
+# --- QO'SHIMCHA FUNKSIYALAR ---
+
+@app.route('/api/products/search', methods=['GET'])
+def search_products():
+    """Mahsulotlarni nomi yoki kategoriyasi bo'yicha qidirish"""
+    query = request.args.get('q', '').lower()
+    category = request.args.get('category', '')
+    
+    filtered = PRODUCTS['products']
+    if category:
+        filtered = [p for p in filtered if p['category'] == category]
+    if query:
+        filtered = [p for p in filtered if query in p['name'].lower()]
+        
+    return jsonify({"products": filtered, "count": len(filtered)})
+
+def validate_total(items):
+    """Xavfsizlik: Frontenddan kelgan narxni bazadagi bilan tekshirish"""
+    real_total = 0
+    for p_id, item in items.items():
+        original = next((p for p in PRODUCTS['products'] if str(p['id']) == str(p_id)), None)
+        if original:
+            real_total += original['price'] * item['quantity']
+    return real_total
+
+# -----------------------------
+
 @app.route('/api/products', methods=['GET'])
 def get_products():
     """Barcha tovarlarni olish"""
@@ -230,6 +263,9 @@ def create_order():
         if not all(field in data for field in required_fields):
             return jsonify({"error": "Barcha maydonlarni to'ldiring"}), 400
         
+        # Qo'shimcha: Narxni tekshirish
+        server_total = validate_total(data['items'])
+        
         orders = load_orders()
         order_id = len(orders) + 1
         
@@ -240,7 +276,7 @@ def create_order():
             "phone": data['phone'],
             "location": data['location'],
             "items": data['items'],
-            "total": data['total'],
+            "total": server_total, # Serverda hisoblangan narxni saqlaymiz
             "status": "pending",
             "created_at": datetime.now().isoformat()
         }
@@ -249,7 +285,7 @@ def create_order():
         save_orders(orders)
         
         send_to_telegram(order_id, data['user_name'], data['phone'], 
-                        data['location'], data['items'], data['total'], data['user_id'])
+                        data['location'], data['items'], server_total, data['user_id'])
         
         return jsonify({
             "success": True,
